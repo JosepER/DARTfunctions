@@ -1,0 +1,32 @@
+Package: DARTfunctions
+Title: Functions for DART
+Version: 0.0.0.0001
+Authors@R: c(person("Josep", "Espasa Reig", role = c("aut", "cre"), email = "jespasareig@gmail.com"))
+Author: Josep Espasa Reig [aut, cre]
+Description: Functions for DART.
+License: GPL-3
+Depends: R (>= 4.0)
+Imports:
+    dplyr,
+    ggplot2,
+    stringr,
+    rlang,
+    glue,
+    magrittr,
+    purrr,
+    lifecycle,
+    assertthat,
+    tibble,
+    readr,
+    here
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat,
+    covr,
+    knitr,
+    rmarkdown,
+    fs
+RdMacros: lifecycle
