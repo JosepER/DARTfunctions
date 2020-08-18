@@ -11,7 +11,7 @@ read_upload_files_from_zip <- function(path_to_zipfile){
   
   file <- files_raw %>%
     purrr::map(~stringr::str_split(.x, pattern = "\\|\\$\\|") %>%
-                 purrr::map(~set_names(.x , c("indicator_id", "variable_id", "group_value_id", "value"))) %>%
+                 purrr::map(~purrr::set_names(.x , c("indicator_id", "variable_id", "group_value_id", "value"))) %>%
                  dplyr::bind_rows()) %>%
     dplyr::bind_rows(.id = "file")
   
