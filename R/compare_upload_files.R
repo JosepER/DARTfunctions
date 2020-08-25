@@ -41,12 +41,15 @@ retrieve_path_to_dart <- function(){
   
 }
 
-
+#note: this function could import already read data. this would be useful to avoid reading the data multiple times in Shiny apps
+# see the mark below
 compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TRUE){
   
   file_1 <- read_upload_files_from_zip(path_to_file_1)
   
   file_2 <- read_upload_files_from_zip(path_to_file_2)
+  
+  # mark: the function would start here:------
   
   # check missing files in file_1 and file_2
   
@@ -71,7 +74,8 @@ compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TR
     dplyr::left_join(file_2, by = c("file", "indicator_id", "variable_id", "group_value_id"))
   
   merged_files %<>%
-    dplyr::mutate(ratio_diff = as.numeric(value_file_1)/as.numeric(value_file_2),
+    dplyr::mutate(abs_diff =  as.numeric(value_file_1)-as.numeric(value_file_2),
+                  ratio_diff = as.numeric(value_file_1)/as.numeric(value_file_2),
                   change = (abs_ratio_diff < 0.99) | ( abs_ratio_diff > 1.01))
   
   
