@@ -76,7 +76,7 @@ compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TR
   merged_files %<>%
     dplyr::mutate(abs_diff =  as.numeric(value_file_1)-as.numeric(value_file_2),
                   ratio_diff = as.numeric(value_file_1)/as.numeric(value_file_2),
-                  change = (abs_ratio_diff < 0.99) | ( abs_ratio_diff > 1.01))
+                  change = (ratio_diff < 0.99) | ( ratio_diff > 1.01))
   
   
   if(use_labels){
