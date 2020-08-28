@@ -65,6 +65,21 @@ compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TR
   } 
   
   
+  if(is.all.lws.files(file_1[["file"]]) & is.all.lws.files(file_2[["file"]])){
+    
+    database <- "lws"
+    
+  }else if(is.all.lis.files(file_1[["file"]]) & is.all.lis.files(file_2[["file"]])){
+    
+    database <- "lis"
+    
+  }else{
+    
+    stop("Couldn't detect if the file belongs to LIS or LWS database.")
+    
+  }
+  
+  
   # merge files
   
   names(file_1) <- c("file", "indicator_id", "variable_id", "group_value_id", "value_file_1")
@@ -79,7 +94,7 @@ compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TR
                   change = (ratio_diff < 0.99) | ( ratio_diff > 1.01))
   
   
-  if(use_labels){
+  if(use_labels & database == "lws"){
     
     merged_files %<>%
       dplyr::mutate(variable_id = dplyr::recode(variable_id, 
@@ -115,20 +130,63 @@ compare_upload_files <- function(path_to_file_1, path_to_file_2, use_labels = TR
                                                  `19` =   "[19] Share of Category in Total Population")
       )
     
-    
     path_to_dart <- retrieve_path_to_dart()
     
     group_value_categories <- readr::read_rds(paste0(path_to_dart, "Josep/interim_outputs/map_group_categories_numbers/map_decompositions_lws_with_categories.rds")) %>%
       dplyr::select(category_num, category) %>%
       dplyr::mutate(category_num = as.character(category_num))
     
-    merged_files %<>%
-      dplyr::left_join(group_value_categories, by = c("group_value_id" = "category_num")) %>%
-      dplyr::select(file, indicator_id, variable_id, group_value_id, category, value_file_1, value_file_2, abs_diff, ratio_diff, change)
     
+  } else if(use_labels & database == "lis"){
+    
+    merged_files %<>%
+      dplyr::mutate(variable_id = dplyr::recode(variable_id, 
+                                                `1` = "[1] Disposable Household Income (eq.) - dhi_eq",
+                                                `2` = "[2] Market Household Income (eq.) - mhi",
+                                                `5` = "[5] Market Household Income (new) - ma_eq",
+                                                `6` = "[6] Gross Wages - pi11"),
+                    indicator_id = dplyr::recode(indicator_id,
+                                                 `1` =   "[1] Gini Index",
+                                                 `2` =   "[2] Atkinson Index (Aversion parameter = 1.5)",
+                                                 `4` =   "[4] Percentile Ratio (90/10)",
+                                                 `5` =   "[5] Percentile Ratio (90/50)",
+                                                 `6` =   "[6] Percentile Ratio (50/10)",
+                                                 `7` =   "[7] Average",
+                                                 `8` =   "[8] Median",
+                                                 `9` =   "[9] Share of Low Income Workers (< 50% of Median)",
+                                                 `10` =  "[10] Relative Poverty Rate at %50 of the median",
+                                                 `11` =  "[11] Relative Poverty Rate at %60 of the median",
+                                                 `19` =  "[19] Share of Category in Total Population")
+      )
+    
+    path_to_dart <- retrieve_path_to_dart()
+    
+    group_value_categories <- readr::read_rds(paste0(path_to_dart, "Josep/interim_outputs/map_group_categories_numbers/map_decompositions_lis_with_categories.rds")) %>%
+      dplyr::select(category_num, category) %>%
+      dplyr::mutate(category_num = as.character(category_num))
     
   }
   
+  merged_files %<>%
+    dplyr::left_join(group_value_categories, by = c("group_value_id" = "category_num")) %>%
+    dplyr::select(file, indicator_id, variable_id, group_value_id, category, value_file_1, value_file_2, abs_diff, ratio_diff, change)
+  
+  
   return(merged_files)
+  
+}
+
+
+
+is.all.lws.files <- function(file_names){
+  
+  all(stringr::str_detect(file_names, pattern = "^lws"))
+  
+}
+
+
+is.all.lis.files <- function(file_names){
+  
+  all(stringr::str_detect(file_names, pattern = "^lis"))
   
 }
